@@ -1,0 +1,49 @@
+# 开发环境配置
+springdoc:
+  paths-to-match: /api/**
+  swagger-ui:
+    operations-sorter: alpha
+spring:
+  mail:
+    host: smtp.163.com
+    username: javaweb111@163.com
+    password: UMUNGOCGACNHANOL
+    port: 25
+  rabbitmq:
+    addresses: 47.92.80.128
+    username: rabbitmq
+    password: qaz13579
+    virtual-host: /
+  datasource:
+    url: jdbc:mysql://47.92.80.128:3306/monitor
+    username: monitor
+    password: ATYPKywdF2c38aiw
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      database: 0
+      host: 47.92.80.128
+      port: 6379
+      username: default
+      password: redis_PCpmaT
+  security:
+    jwt:
+      key: 'monitor-key'
+      expire: 72
+      limit:
+        base: 10
+        upgrade: 300
+        frequency: 30
+    filter:
+      order: -100
+  web:
+    verify:
+      mail-limit: 60
+    flow:
+      period: 3
+      limit: 50
+      block: 30
+    cors:
+      origin: '*'
+      credentials: false
+      methods: '*'
