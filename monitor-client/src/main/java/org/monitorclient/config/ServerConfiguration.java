@@ -4,7 +4,10 @@ import com.alibaba.fastjson2.JSONObject;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.monitorclient.entity.ConnectionConfig;
+import org.monitorclient.utils.MonitorUtils;
 import org.monitorclient.utils.NetUtils;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,10 +23,19 @@ import java.util.Scanner;
  */
 @Slf4j
 @Configuration
-public class ServerConfiguration{
+public class ServerConfiguration implements ApplicationRunner {
 
     @Resource
     NetUtils net;
+
+    @Resource
+    MonitorUtils monitor;
+
+    @Override
+    public void run(ApplicationArguments args) {
+        log.info("正在向服务端更新基本信息。。。");
+        net.updateBaseDetails(monitor.monitorBaseDetail());
+    }
 
     @Bean
     ConnectionConfig connectionConfig(){
@@ -32,6 +44,7 @@ public class ServerConfiguration{
         if (config==null){
             config=this.readFromScreen();
         }
+        System.out.println(monitor.monitorBaseDetail());
         return config;
     }
 

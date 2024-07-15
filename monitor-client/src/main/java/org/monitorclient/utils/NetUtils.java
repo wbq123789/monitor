@@ -3,6 +3,7 @@ package org.monitorclient.utils;
 import com.alibaba.fastjson2.JSONObject;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.monitorclient.entity.BaseDetail;
 import org.monitorclient.entity.ConnectionConfig;
 import org.monitorclient.entity.Response;
 import org.springframework.context.annotation.Lazy;
@@ -39,7 +40,14 @@ public class NetUtils {
         }
         return response.success();
     }
-
+    public void updateBaseDetails(BaseDetail detail){
+        Response response = this.doPost("/detail", detail);
+        if (response.success()){
+            log.info("系统基本信息更新完成！");
+        }else {
+            log.error("系统基本信息更新失败：{}",response.message());
+        }
+    }
     private Response doGet(String url){
         return this.doGet(url,config.getAddress(),config.getToken());
     }
@@ -52,7 +60,22 @@ public class NetUtils {
             HttpResponse<String> response=client.send(request,HttpResponse.BodyHandlers.ofString());
             return JSONObject.parseObject(response.body()).to(Response.class);
         }catch (Exception e){
-            log.error("发起服务端请求出现问题",e);
+            log.error("向服务端发起GET请求出现问题",e);
+            return Response.errorResponse(e);
+        }
+    }
+    private Response doPost(String url,Object data){
+        try{
+            String rawData=JSONObject.from(data).toJSONString();
+           HttpRequest request=HttpRequest.newBuilder().POST(HttpRequest.BodyPublishers.ofString(rawData))
+                   .uri(new URI(config.getAddress()+"/monitor"+url))
+                   .header("Authorization",config.getToken())
+                   .header("Content-Type","application/json")
+                   .build();
+           HttpResponse<String> response =client.send(request,HttpResponse.BodyHandlers.ofString());
+           return JSONObject.parseObject(response.body()).to(Response.class);
+        }catch (Exception e){
+            log.error("向服务端发起POST请求出现问题",e);
             return Response.errorResponse(e);
         }
     }

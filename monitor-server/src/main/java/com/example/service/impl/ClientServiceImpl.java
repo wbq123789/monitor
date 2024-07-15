@@ -2,15 +2,22 @@ package com.example.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.entity.dto.Client;
+import com.example.entity.dto.ClientDetail;
+import com.example.entity.vo.request.ClientDetailVO;
+import com.example.mapper.ClientDetailMapper;
 import com.example.mapper.ClientMapper;
 import com.example.service.ClientService;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,6 +36,12 @@ public class ClientServiceImpl  extends ServiceImpl<ClientMapper, Client> implem
     private final Map<Integer,Client> clientIdCache = new ConcurrentHashMap<>();
     private final Map<String,Client> clientTokenCache = new ConcurrentHashMap<>();
 
+    @Resource
+    ClientMapper clientMapper;
+
+    @Resource
+    private ClientDetailMapper clientDetailMapper;
+
     @PostConstruct
     public void initClientCache(){
         clientIdCache.clear();
@@ -40,7 +53,7 @@ public class ClientServiceImpl  extends ServiceImpl<ClientMapper, Client> implem
     public boolean registerClient(String token) {
         if(this.registerToken.equals(token)){
             int id=this.randomClientId();
-            Client client=new Client(id,"未命名主机",token,new Date());
+            Client client=new Client(id,"未命名主机",token,"cn","未命名节点",new Date());
             if (this.save(client)){
                 this.registerToken=this.createNewToken();
                 this.addClientCache(client);
@@ -64,6 +77,18 @@ public class ClientServiceImpl  extends ServiceImpl<ClientMapper, Client> implem
     @Override
     public Client findClientByToken(String token) {
         return clientTokenCache.get(token);
+    }
+
+    @Override
+    public void updateClientDetail(ClientDetailVO vo, Client client) {
+        ClientDetail clientDetail=new ClientDetail();
+        BeanUtils.copyProperties(vo,clientDetail);
+        clientDetail.setId(client.getId());
+        if (Objects.nonNull(clientDetailMapper.selectById(client.getId()))){
+            clientDetailMapper.updateById(clientDetail);
+        }else {
+            clientDetailMapper.insert(clientDetail);
+        }
     }
 
     private void addClientCache(Client client){
