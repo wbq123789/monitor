@@ -4,6 +4,7 @@ import com.example.entity.RestBean;
 import com.example.entity.dto.Client;
 import com.example.entity.dto.ClientDetail;
 import com.example.entity.vo.request.ClientDetailVO;
+import com.example.entity.vo.request.RuntimeDetailVO;
 import com.example.service.ClientService;
 import com.example.utils.Const;
 import jakarta.annotation.Resource;
@@ -27,9 +28,15 @@ public class ClientController {
         return clientService.registerClient(token) ? RestBean.success() :RestBean.failure(401,"客户端注册失败，请检查Token是否正确！");
     }
     @PostMapping("/detail")
-    public RestBean<Void> updateClientDetail(@RequestAttribute(Const.ATTR_CLIENT)Client client,
+    public RestBean<Void> updateClientDetails(@RequestAttribute(Const.ATTR_CLIENT)Client client,
                                              @RequestBody @Valid ClientDetailVO vo){
         clientService.updateClientDetail(vo,client);
+        return RestBean.success();
+    }
+    @PostMapping("/runtime")
+    public RestBean<Void> updateRuntimeDetails(@RequestAttribute(Const.ATTR_CLIENT)Client client,
+                                               @RequestBody @Valid RuntimeDetailVO vo){
+        clientService.updateRuntimeDetail(vo,client);
         return RestBean.success();
     }
 }
