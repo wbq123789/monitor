@@ -23,6 +23,17 @@ const router = createRouter({
             path: '/index',
             name: 'index',
             component: () => import('@/views/IndexView.vue'),
+            children:[
+                {
+                    path: '',
+                    name: 'manage',
+                    component:()=>import('@/views/tabs/Manage.vue')
+                },{
+                    path: 'security',
+                    name: 'security',
+                    component:()=>import('@/views/tabs/Security.vue')
+                }
+            ]
         }
     ]
 })
