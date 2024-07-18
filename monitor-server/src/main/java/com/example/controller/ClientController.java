@@ -2,7 +2,6 @@ package com.example.controller;
 
 import com.example.entity.RestBean;
 import com.example.entity.dto.Client;
-import com.example.entity.dto.ClientDetail;
 import com.example.entity.vo.request.ClientDetailVO;
 import com.example.entity.vo.request.RuntimeDetailVO;
 import com.example.service.ClientService;

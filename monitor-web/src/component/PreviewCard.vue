@@ -1,5 +1,9 @@
 <script setup>
+import {fitByUnit} from "../tools";
 
+const props=defineProps({
+  data:Object
+})
 </script>
 
 <template>
@@ -7,46 +11,53 @@
     <div style="display: flex;justify-content: space-between">
       <div>
         <div class="name">
-          <span class="fi fi-cn"></span>
-          <span style="margin: 0 5px">flying后端服务器</span>
+          <span :class="`fi fi-${data.location}`"></span>
+          <span style="margin: 0 5px">{{data.name}}</span>
           <i class="fa-solid fa-pen-to-square"></i>
         </div>
         <div class="os">
-          操作系统: Ubuntu 22.04
+          操作系统: {{ `${data.osName} ${data.osVersion}` }}
         </div>
       </div>
-      <div class="status">
+      <div class="status" v-if="data.online">
         <i style="color: #02ca02" class="fa-solid fa-circle-play"></i>
         &nbsp;<span>运行中</span>
+      </div>
+      <div class="status" v-else>
+        <i style="color: #8a8a8a" class="fa-solid fa-circle-stop"></i>
+        &nbsp;<span>离线</span>
       </div>
     </div>
     <el-divider style="margin: 10px 0"/>
     <div class="network">
-      <span style="margin-right: 10px">公网IP：192.168.0.112</span>
+      <span style="margin-right: 10px">公网IP：{{ data.ip }}</span>
       <i class="fa-solid fa-copy" style="color: #2fa5a5"></i>
+    </div>
+    <div class="cpu">
+      <span style="margin-right: 10px">处理器：{{ data.cpuName }}</span>
     </div>
     <div class="hardware">
       <i class="fa-solid fa-microchip"></i>
-      <span style="margin-right: 10px"> 2 CPU</span>
+      <span style="margin-right: 10px">{{` ${data.cpuCore} CPU`}}</span>
       <i class="fa-solid fa-memory"></i>
-      <span> 2 GB</span>
+      <span>{{` ${data.memory.toFixed(1)} GB`}}</span>
     </div>
     <div class="progress">
-      <span>CPU Usage: 2.5%</span>
-      <el-progress status="success" :percentage="2.5" :stroke-width="5" :show-text="false"/>
+      <span>{{ `CPU Usage: ${(data.cpuUsage * 100).toFixed(1)} %` }}</span>
+      <el-progress status="success" :percentage="data.cpuUsage * 100" :stroke-width="5" :show-text="false"/>
     </div>
     <div class="progress">
-      <span>Memory Usage: <b>2.5</b>GB</span>
-      <el-progress status="success" :percentage="2.5/8 *100" :stroke-width="5" :show-text="false"/>
+      <span>Memory Usage: <b>{{ data.memoryUsage.toFixed(1) }}</b>GB</span>
+      <el-progress status="success" :percentage="data.memoryUsage/data.memory *100" :stroke-width="5" :show-text="false"/>
     </div>
     <div class="network-flow">
       <div>网络流量</div>
       <div>
         <i class="fa-solid fa-arrow-up"></i>
-        <span> 120 KB/s</span>
+        <span>{{ ` ${fitByUnit(data.networkUpload,'KB')} /s `}}</span>
         <el-divider direction="vertical"/>
         <i class="fa-solid fa-arrow-down"></i>
-        <span> 1024 KB/s</span>
+        <span>{{ ` ${fitByUnit(data.networkDownload,'KB')} /s `}}</span>
       </div>
     </div>
   </div>
@@ -89,6 +100,9 @@
   .progress{
     margin-top: 10px;
     font-size: 12px;
+  }
+  .cpu{
+    font-size: 13px;
   }
   .network-flow{
     font-size: 12px;
