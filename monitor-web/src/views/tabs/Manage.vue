@@ -18,7 +18,7 @@ updateList()
   <div class="desc">在这里你可以管理你的各个服务器，并快速查看其内存、CPU等实时监控数据</div>
   <el-divider style="margin: 10px 0 "/>
   <div class="card-list">
-    <preview-card v-for="item in list" :data="item"/>
+    <preview-card v-for="item in list" :data="item" :update="updateList"/>
   </div>
 </div>
 </template>
