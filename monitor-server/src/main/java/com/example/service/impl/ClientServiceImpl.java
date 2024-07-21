@@ -6,7 +6,9 @@ import com.example.entity.dto.Client;
 import com.example.entity.dto.ClientDetail;
 import com.example.entity.vo.request.ClientDetailVO;
 import com.example.entity.vo.request.RenameClientVO;
+import com.example.entity.vo.request.RenameNodeVO;
 import com.example.entity.vo.request.RuntimeDetailVO;
+import com.example.entity.vo.response.ClientDetailsVO;
 import com.example.entity.vo.response.ClientPreviewVO;
 import com.example.mapper.ClientDetailMapper;
 import com.example.mapper.ClientMapper;
@@ -40,9 +42,6 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
 
     @Resource
     influxDBUtils influx;
-
-    @Resource
-    ClientMapper clientMapper;
 
     @Resource
     private ClientDetailMapper clientDetailMapper;
@@ -108,7 +107,7 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
             ClientPreviewVO vo=client.asViewObject(ClientPreviewVO.class);
             BeanUtils.copyProperties(clientDetailMapper.selectById(client.getId()),vo);
             RuntimeDetailVO runtime = currentRuntime.get(client.getId());
-            if (runtime!=null&&System.currentTimeMillis() - runtime.getTimestamp()<60*1000) {
+            if (this.isOnline(runtime)) {
                 BeanUtils.copyProperties(runtime, vo);
                 vo.setOnline(true);
             }
@@ -120,6 +119,25 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
     public void renameClient(RenameClientVO vo) {
         this.update(Wrappers.<Client>update().eq("id",vo.getId()).set("name",vo.getName()));
         this.initClientCache();
+    }
+
+    @Override
+    public ClientDetailsVO clientDetails(int clientId) {
+        ClientDetailsVO client=clientIdCache.get(clientId).asViewObject(ClientDetailsVO.class);
+        BeanUtils.copyProperties(clientDetailMapper.selectById(clientId),client);
+        client.setOnline(this.isOnline(currentRuntime.get(clientId)));
+        return client;
+    }
+
+    @Override
+    public void renameNode(RenameNodeVO vo) {
+        this.update(Wrappers.<Client>update().eq("id",vo.getId())
+                .set("location",vo.getLocation()).set("node",vo.getNode()));
+        this.initClientCache();
+    }
+
+    private boolean isOnline(RuntimeDetailVO runtime){
+        return runtime!=null&&System.currentTimeMillis() - runtime.getTimestamp()<60*1000;
     }
 
     private void addClientCache(Client client) {
