@@ -3,8 +3,10 @@ package com.example.controller;
 import com.example.entity.RestBean;
 import com.example.entity.vo.request.RenameClientVO;
 import com.example.entity.vo.request.RenameNodeVO;
+import com.example.entity.vo.request.RuntimeDetailVO;
 import com.example.entity.vo.response.ClientDetailsVO;
 import com.example.entity.vo.response.ClientPreviewVO;
+import com.example.entity.vo.response.RuntimeHistoryVO;
 import com.example.service.ClientService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -40,7 +42,15 @@ public class MonitorController {
         return RestBean.success();
     }
     @GetMapping("/details")
-    public RestBean<ClientDetailsVO> details(int clientId){
+    public RestBean<ClientDetailsVO> details(@RequestParam int clientId){
         return RestBean.success(clientService.clientDetails(clientId));
+    }
+    @GetMapping("/runtime_history")
+    public RestBean<RuntimeHistoryVO> runtimeDetailsHistory(@RequestParam int clientId){
+        return RestBean.success(clientService.clientRuntimeDetailsHistory(clientId));
+    }
+    @GetMapping("/runtime_now")
+    public RestBean<RuntimeDetailVO> runtimeDetailsNow(@RequestParam int clientId){
+        return RestBean.success(clientService.clientRuntimeDetailsNow(clientId));
     }
 }
