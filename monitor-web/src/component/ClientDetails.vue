@@ -2,8 +2,9 @@
 import {computed, reactive, watch} from "vue";
 import {get, post} from "@/net";
 import {copyIp, cpuNameToImage, fitByUnit, osNameToIcon, percentageToStatus, rename} from "@/tools";
-import {ElMessage} from "element-plus";
+import {ElMessage, ElMessageBox} from "element-plus";
 import RuntimeHistory from "@/component/RuntimeHistory.vue";
+import {Delete} from "@element-plus/icons-vue";
 
 const locations = [
   {name: 'cn', desc: '中国大陆'},
@@ -18,6 +19,7 @@ const props=defineProps({
   id:Number,
   update: Function
 })
+const emits=defineEmits(['delete'])
 const details=reactive({
   base:{},
   runtime:{
@@ -50,6 +52,20 @@ function updateDetails() {
   init(props.id)
 }
 
+function deleteClient() {
+  ElMessageBox.confirm('删除此主机后所有统计数据都将丢失，您确定要这样做吗？', '删除主机', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(() => {
+    get(`/api/monitor/delete?clientId=${props.id}`, () => {
+      emits('delete')
+      props.update()
+      ElMessage.success('主机已成功移除')
+    })
+  }).catch(() => {})
+}
+
 setInterval(() => {
   if(props.id !== -1 && details.runtime) {
     get(`/api/monitor/runtime_now?clientId=${props.id}`, data => {
@@ -78,9 +94,14 @@ watch(()=>props.id,init,{immediate:true})
   <el-scrollbar>
     <div class="client-details" v-loading="Object.keys(details.base).length===0">
       <div v-if="Object.keys(details.base).length">
-        <div class="title">
-          <i class="fa-solid fa-server"></i>
-          服务器信息
+        <div style="display: flex;justify-content: space-between">
+          <div class="title">
+            <i class="fa-solid fa-server"></i>
+            服务器信息
+          </div>
+          <el-button :icon="Delete" type="danger"
+                     @click="deleteClient"
+                     plain text>删除此主机</el-button>
         </div>
         <el-divider style="margin: 10px 0"/>
         <div class="details-list">

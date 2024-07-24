@@ -150,6 +150,14 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         return currentRuntime.get(clientId);
     }
 
+    @Override
+    public void deleteClient(int clientId) {
+        this.removeById(clientId);
+        baseMapper.deleteById(clientId);
+        this.initClientCache();
+        currentRuntime.remove(clientId);
+    }
+
     private boolean isOnline(RuntimeDetailVO runtime){
         return runtime!=null&&System.currentTimeMillis() - runtime.getTimestamp()<60*1000;
     }
@@ -170,7 +178,6 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         for (int i = 0; i < 24; i++) {
             builder.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
         }
-        System.out.println(builder);
         return builder.toString();
     }
 }
