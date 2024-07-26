@@ -1,13 +1,31 @@
 <script setup>
 import PreviewCard from "@/component/PreviewCard.vue";
-import {reactive, ref} from "vue";
+import {computed, reactive, ref} from "vue";
 import {get} from "@/net";
 import ClientDetails from "@/component/ClientDetails.vue";
 import RegisterCard from "@/component/RegisterCard.vue";
 import {Plus} from "@element-plus/icons-vue";
+import {useRoute} from "vue-router";
+import {useStore} from "@/store";
 
+const locations = [
+  {name: 'cn', desc: '中国大陆'},
+  {name: 'hk', desc: '香港'},
+  {name: 'jp', desc: '日本'},
+  {name: 'us', desc: '美国'},
+  {name: 'sg', desc: '新加坡'},
+  {name: 'kr', desc: '韩国'},
+  {name: 'de', desc: '德国'}
+]
+
+const store=useStore()
 const list=ref([])
-const updateList=()=>get("/api/monitor/list",data => list.value = data)
+const route =useRoute()
+const updateList=()=> {
+  if (route.name==="manage") {
+    get("/api/monitor/list", data => list.value = data)
+  }
+}
 setInterval(updateList,10000)
 updateList()
 const register = reactive({
@@ -22,6 +40,16 @@ const displayClientDetails=(id)=>{
   detail.show=true
   detail.id=id
 }
+const checkedNodes=ref([])
+
+const clientList=computed(()=>{
+  if (checkedNodes.value.length===0){
+    return list.value
+  }else {
+    return list.value.filter(item=>checkedNodes.value.indexOf(item.location)>0)
+  }
+
+})
 const refreshToken=()=>get('/api/monitor/register',token=>register.token=token);
 </script>
 
@@ -34,12 +62,21 @@ const refreshToken=()=>get('/api/monitor/register',token=>register.token=token);
     </div>
     <div>
       <el-button :icon="Plus" type="primary" plain
+                 :disabled="!store.isAdmin"
                  @click="register.show =true">添加新主机</el-button>
     </div>
   </div>
   <el-divider style="margin: 10px 0 "/>
+  <div style="margin-bottom: 20px">
+    <el-checkbox-group v-model="checkedNodes">
+      <el-checkbox v-for="node in locations" :key="node" :label="node.name" border>
+        <span :class="`fi fi-${node.name}`"></span>
+        <span style="font-size: 13px;margin-left: 10px">{{node.desc}}</span>
+      </el-checkbox>
+    </el-checkbox-group>
+  </div>
   <div class="card-list" v-if="list.length">
-    <preview-card v-for="item in list" :data="item" :update="updateList" @click="displayClientDetails(item.id)"/>
+    <preview-card v-for="item in clientList" :data="item" :update="updateList" @click="displayClientDetails(item.id)"/>
   </div>
   <el-empty description="当前无主机连接，请点击添加主机按钮" v-else/>
   <el-drawer size="520" :show-close="false" v-model="detail.show"
@@ -55,6 +92,9 @@ const refreshToken=()=>get('/api/monitor/register',token=>register.token=token);
 </template>
 
 <style scoped>
+:deep(.el-checkbox-group .el-checkbox){
+  margin-right: 10px;
+}
 :deep(.el-drawer){
   margin: 10px;
   height: calc(100% - 20px);

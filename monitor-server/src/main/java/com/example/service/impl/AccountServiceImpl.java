@@ -1,15 +1,21 @@
 package com.example.service.impl;
 
+import com.alibaba.fastjson2.JSONArray;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.entity.dto.Account;
 import com.example.entity.vo.request.ConfirmResetVO;
+import com.example.entity.vo.request.CreateSubAccountVO;
 import com.example.entity.vo.request.EmailResetVO;
+import com.example.entity.vo.request.ModifyEmailVO;
+import com.example.entity.vo.response.SubAccountVO;
 import com.example.mapper.AccountMapper;
 import com.example.service.AccountService;
 import com.example.utils.Const;
 import com.example.utils.FlowUtils;
 import jakarta.annotation.Resource;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.User;
@@ -18,6 +24,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -113,6 +121,58 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         String code = this.getEmailVerifyCode(email);
         if(code == null) return "请先获取验证码";
         if(!code.equals(info.getCode())) return "验证码错误，请重新输入";
+        return null;
+    }
+
+    @Override
+    public boolean changePassword(int id, String oldPass, String newPass) {
+        Account account=this.getById(id);
+        String password=account.getPassword();
+        if (!passwordEncoder.matches(oldPass,password))
+            return false;
+        this.update(Wrappers.<Account>update().eq("id",id).set("password",passwordEncoder.encode(newPass)));
+        return true;
+    }
+
+    @Override
+    public void createSubAccount(CreateSubAccountVO vo) {
+        Account account=findAccountByNameOrEmail(vo.getEmail());
+        if (account!=null)
+            throw new IllegalArgumentException("邮箱已被使用！");
+        account=findAccountByNameOrEmail(vo.getUsername());
+        if (account!=null)
+            throw new IllegalArgumentException("用户名已被使用！");
+        account=new Account(null,vo.getUsername(),passwordEncoder.encode(vo.getPassword())
+                ,vo.getEmail(),Const.ROLE_DEFAULT, JSONArray.copyOf(vo.getClients()).toString(),new Date());
+        this.save(account);
+    }
+
+    @Override
+    public void deleteSubAccount(int uid) {
+        this.removeById(uid);
+    }
+
+    @Override
+    public List<SubAccountVO> listSubAccount() {
+        return this.list(Wrappers.<Account>query().eq("role",Const.ROLE_DEFAULT))
+                .stream().map(account -> {
+                    SubAccountVO vo=new SubAccountVO();
+                    BeanUtils.copyProperties(account,vo,"clients");
+                    vo.setClients(JSONArray.parse(account.getClients()));
+                    return vo;
+                }).toList();
+    }
+
+    @Override
+    public String modifyEmail(int uid, ModifyEmailVO vo) {
+        String code=getEmailVerifyCode(vo.getEmail());
+        if (code==null) return "请先获取验证码！";
+        if(!code.equals(vo.getCode())) return "验证码错误，请重新输入！";
+        this.deleteEmailVerifyCode(vo.getEmail());
+        Account account=this.findAccountByNameOrEmail(vo.getEmail());
+        if (account!=null&&account.getId()!= uid) return "该邮箱已被他人绑定，请更换邮箱！";
+        this.update().set("email",vo.getEmail())
+                .eq("id",uid).update();
         return null;
     }
 

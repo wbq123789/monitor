@@ -9,6 +9,14 @@
                    v-model="dark" active-color="#424242"
                    :active-action-icon="Moon"
                    :inactive-action-icon="Sunny"/>
+        <div style="text-align: right;line-height: 16px;margin-right: 10px">
+          <div>
+            <el-tag type="success" v-if="store.isAdmin" size="small">管理员</el-tag>
+            <el-tag v-else size="small">子账户</el-tag>
+            {{store.user.username}}
+          </div>
+          <div style="font-size: 13px;color: grey">{{store.user.email}}</div>
+        </div>
       </div>
       <el-dropdown>
         <el-avatar class="avatar" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"/>
@@ -25,7 +33,9 @@
     <el-main class="main-content">
       <router-view v-slot="{ Component }">
         <transition name="el-fade-in-linear" mode="out-in">
-          <component :is="Component"/>
+          <keep-alive exclude="security">
+            <component :is="Component"/>
+          </keep-alive>
         </transition>
       </router-view>
     </el-main>
@@ -40,7 +50,9 @@ import {ref} from "vue";
 import {useDark} from "@vueuse/core";
 import {useRoute} from "vue-router";
 import TabItem from "@/component/TabItem.vue";
+import {useStore} from "@/store";
 
+const store=useStore()
 const route=useRoute()
 const dark=ref(useDark())
 const tabs = [

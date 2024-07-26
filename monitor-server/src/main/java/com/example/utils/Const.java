@@ -7,6 +7,8 @@ public final class Const {
     //JWT令牌
     public final static String JWT_BLACK_LIST = "jwt:blacklist:";
     public final static String JWT_FREQUENCY = "jwt:frequency:";
+    //用户
+    public final static String USER_BLACK_LIST="user:blacklist:";
     //请求频率限制
     public final static String FLOW_LIMIT_COUNTER = "flow:counter:";
     public final static String FLOW_LIMIT_BLOCK = "flow:block:";
@@ -19,6 +21,7 @@ public final class Const {
     //请求自定义属性
     public final static String ATTR_USER_ID = "userId";
     public final static String ATTR_CLIENT = "client";
+    public final static String ATTR_USER_ROLE = "userRole";
     //消息队列
     public final static String MQ_MAIL = "mail";
     //用户角色

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * 用于对请求头中Jwt令牌进行校验的工具，为当前请求添加用户验证信息
@@ -59,6 +60,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 request.setAttribute(Const.ATTR_USER_ID, utils.toId(jwt));
+                request.setAttribute(Const.ATTR_USER_ROLE,new ArrayList<>(user.getAuthorities()).get(0).getAuthority());
             }
         }
         filterChain.doFilter(request, response);
