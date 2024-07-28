@@ -2,13 +2,12 @@ package com.example.controller;
 
 import com.example.entity.RestBean;
 import com.example.entity.dto.Account;
+import com.example.entity.dto.ClientSsh;
 import com.example.entity.vo.request.RenameClientVO;
 import com.example.entity.vo.request.RenameNodeVO;
 import com.example.entity.vo.request.RuntimeDetailVO;
-import com.example.entity.vo.response.ClientDetailsVO;
-import com.example.entity.vo.response.ClientPreviewVO;
-import com.example.entity.vo.response.ClientSimpleVO;
-import com.example.entity.vo.response.RuntimeHistoryVO;
+import com.example.entity.vo.request.SshConnectVO;
+import com.example.entity.vo.response.*;
 import com.example.service.AccountService;
 import com.example.service.ClientService;
 import com.example.utils.Const;
@@ -117,6 +116,25 @@ public class MonitorController {
         if (this.isAdminAccount(userRole)) {
             clientService.deleteClient(clientId);
             return RestBean.success();
+        }else
+            return RestBean.noPermission();
+    }
+    @PostMapping("ssh-save")
+    public RestBean<Void> saveSSHConnection(@RequestAttribute(Const.ATTR_USER_ID) int userId,
+                                            @RequestAttribute(Const.ATTR_USER_ROLE) String userRole,
+                                            @RequestBody @Valid SshConnectVO vo){
+        if (this.permissionCheck(userId,userRole, vo.getId())) {
+            clientService.saveSshConnection(vo);
+            return RestBean.success();
+        }else
+            return RestBean.noPermission();
+    }
+    @GetMapping("/ssh")
+    public RestBean<SshSettingsVO> getSshConnect(@RequestAttribute(Const.ATTR_USER_ID) int userId,
+                                                 @RequestAttribute(Const.ATTR_USER_ROLE) String userRole,
+                                                 @RequestParam int clientId){
+        if (this.permissionCheck(userId,userRole, clientId)) {
+            return RestBean.success(clientService.getSshSetting(clientId));
         }else
             return RestBean.noPermission();
     }
