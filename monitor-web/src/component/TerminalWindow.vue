@@ -1,6 +1,7 @@
 <script setup>
 import {reactive, ref, watch} from "vue";
 import {get, post} from "@/net";
+import Terminal from "@/component/Terminal.vue";
 
 const props=defineProps({
   id: Number
@@ -71,11 +72,11 @@ watch(() => props.id, id => {
         <el-button type="success" @click="saveConnection" plain>立即连接</el-button>
       </el-form>
     </div>
-<!--    <div v-if="state === 2">-->
-<!--      <div style="overflow: hidden;padding: 0 10px 10px 10px">-->
-<!--        <terminal :id="id" @dispose="state = 1"/>-->
-<!--      </div>-->
-<!--    </div>-->
+    <div v-if="state === 2">
+      <div style="overflow: hidden;padding: 0 10px 10px 10px">
+        <terminal :id="id" @dispose="state = 1"/>
+      </div>
+    </div>
   </div>
 </template>
 

@@ -101,12 +101,13 @@ const terminal=reactive({
   </el-drawer>
   <el-drawer style="width: 800px;" :size="500" direction="btt"
              :close-on-click-modal="false"
+             @close="terminal.id= -1"
              v-model="terminal.show">
     <template #header>
       <div>
         <div style="font-size: 18px;color: dodgerblue;font-weight: bold">SSH远程连接</div>
         <div style="font-size: 14px">
-          远程连接的立由服务端完成，因此在内网中也能正常使用。
+          远程连接的建立由服务端完成，因此部署在内部网络中的服务器在外网也能正常访问。
         </div>
       </div>
     </template>
