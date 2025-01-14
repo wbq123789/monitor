@@ -1,4 +1,4 @@
-package com.example.controller.exception;
+package com.example.controller.exceptionController;
 
 import com.example.entity.RestBean;
 import jakarta.servlet.http.HttpServletRequest;

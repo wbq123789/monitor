@@ -80,7 +80,7 @@ function createSubAccount() {
         <div class="title">
           <i class="fa-solid fa-user-plus"></i> 添加新的子账户
         </div>
-        <div class="desc">子账户同样用于管理服务器，但是可以自由分配指定的服务器，子账户只能访问被分配到的服务器。</div>
+        <div class="desc">子账户同样用于管理服务器，其权限由管理员进行分配，子账户只能访问被分配到的服务器。</div>
         <el-divider style="margin: 10px 0"/>
       </div>
       <div>
@@ -92,7 +92,7 @@ function createSubAccount() {
           </el-form-item>
           <el-form-item label="电子邮件" prop="email">
             <el-input type="email" v-model="form.email"
-                      :prefix-icon="Message" placeholder="子账户电子邮件" maxlength="16"/>
+                      :prefix-icon="Message" placeholder="子账户电子邮件" maxlength="20"/>
           </el-form-item>
           <el-form-item label="密码" prop="password">
             <el-input type="password" v-model="form.password"

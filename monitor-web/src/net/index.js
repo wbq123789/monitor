@@ -79,7 +79,7 @@ function login(username, password, remember, success, failure = defaultFailure){
         store.user.role=data.role
         store.user.username=data.username
         store.user.email=data.email
-        ElMessage.success(`登录成功，欢迎 ${data.username} 来到我们的系统`)
+        ElMessage.success(`登录成功，欢迎 ${data.username} `)
         success(data)
     }, failure)
 }
